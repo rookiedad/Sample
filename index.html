@@ -1,40 +1,113 @@
-<html>
-    <head>
+<!DOCTYPE HTML>
+<html><head><title>Camera</title></head>
+      <head>
         <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css"/>
         <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
-        <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-        
+        <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>        
     </head>
 <body>
-<!--<div class='header'><h1>Photo Squares</h1></div>
-<div class='search-view'>
-<input class='search-key' type="text"/>
-<ul class='employee-list'></ul>
-</div>
+    
+    <!---------------------------------- Camera ------------------------------------------>
+    <div data-role="page" id="cameraMainPage" data-add-back-btn="true" back-btn-text="back">
+        <div data-role="header">
+            <h1>Camera</h1>
+        </div>
+        <div data-role="content">
+            <ul data-role="listview" data-inset="true">
+                <li><a href="#" id="capturePhoneButton">Capture Photo</a></li>
+                <li><a href="#" id="fromPhotoLibraryButton">From Photo Library</a></li>
+            </ul>
+            
+            <div class="mesgBox">
+                <h5 class="hlabel">Using camera.getPicture method</h5>
+                <ul class="smFont">
+                    <li>For both of the above menu items, URI is used to retrieve the image.<br/>
+                        Along with each image, the corresponding URI is shown.
+                    </li>
+                </ul>           
+            </div>
+            
+            <div data-role="popup" id="popupPhoto" class="ui-content" data-theme="e" data-corners="false">
+                <h5 class="hlabel">Image URI</h5>
+                <p id="pictBox" class="content mesgBox"></p>
+                <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+                <img class="popphoto" id="popImage" src="">
+            </div>
+        </div>
+        <div data-role="footer">
+            <div id="cameraStatus"></div>
+        </div>
+        
+           <script type="text/javascript" charset="utf-8">
+        //*********************************************************    
+        // Camera Capabilities
+        //********************************************************* 
+        var pictureSource;
+        var destinationType;
 
-<script src="lib/jquery-1.8.2.min.js"></script>
-<script src="js/storage/memory-store.js"></script>
-<script src="js/main.js"></script>
--->
+        function updateCameraStatus(status) {
+            $("#cameraStatus").html(status);
+        }
 
-    <script>
-        function ReceivedImage(data) {
-            $('#Image').src = "data:image/jpeg;base64," + data;
+        function photoOnFail(message) {
+            updateCameraStatus("ERROR: " + message);
         }
-        
-        function ReceiveURI(uri) {
-            $('#Image').src = imageURI;
+
+        function onPhotoDataSuccess(imageData) {
+            $("#popImage").attr("src", "data:image/jpeg;base64," + imageData);
+            $("#popupPhoto").popup("open");
         }
-        
-        function Error(error) {
-            alert ('Error: ' + error);
+
+        function onPhotoURISuccess(imageURI) {
+            $("#popImage").attr("src", imageURI);
+            //$("#pictBox").empty();
+            //$("#pictBox").append(imageURI).trigger("create");
+            $("#pictBox").html(imageURI);
+            updateCameraStatus("SUCCESS: Image loaded");
+            $("#popupPhoto").popup("open");
         }
-        
-        navigator.camera.getPicture(ReceivedImage, Error, {quality:25, destinationType: Camera.DestinationType.DATA_URL});
-        navigator.camera.getPicture(ReceiveURI, Error, {quality:75, destinationType: Camera.DestinationType.FILE_URI});
-        
-        Camera.PictureSourceType = {PHOTOLIBRARY, CAMERA, SAVEDPHOTOALBUM};
-        Camera.Direction = {BACK, FRONT};
+
+        function capturePhoto() {
+            navigator.camera.getPicture(onPhotoURISuccess, photoOnFail, { quality: 50, destinationType: destinationType.FILE_URI });
+        }
+
+        //Android ignores the allowEdit parameter
+        function capturePhotoEdit() {
+            navigator.camera.getPicture(onPhotoDataSuccess, photoOnFail, { quality: 20, allowEdit: true, destinationType: destinationType.DATA_URL });
+        }
+
+        //source could be Camera.PictureSourceType.PHOTOLIBRARY and SAVEDPHOTOALBUM, in Android, they are the same.
+        function getPhoto(source) {
+            updateCameraStatus("");        
+            navigator.camera.getPicture(onPhotoURISuccess, photoOnFail, { quality: 50, destinationType: destinationType.FILE_URI, sourceType: source });
+        }
+    
+        function getCameraReady() {
+            $("popupPhoto").popup("close");     
+            updateCameraStatus("");
+            pictureSource   = navigator.camera.PictureSourceType;
+            destinationType = navigator.camera.DestinationType;
+
+            $('#capturePhoneButton').on('vclick', function(e) {
+                e.preventDefault();
+                capturePhoto();
+                return false;
+            });
+
+            $('#fromPhotoLibraryButton').on('vclick', function(e){
+                e.preventDefault();
+                getPhoto(pictureSource.PHOTOLIBRARY);
+                return false;
+            });
+        }
+
+        //*********************************************************    
+        // initialize the environment
+        //********************************************************* 
+        $("#cameraMainPage").bind("pagebeforeshow", function() { getCameraReady(); } );
+
     </script>
+ 
+    </div>
 </body>
 </html>
