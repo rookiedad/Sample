@@ -1,15 +1,40 @@
 <html>
+    <head>
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css"/>
+        <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        
+    </head>
 <body>
-
-<div class='header'><h1>Home</h1></div>
+<!--<div class='header'><h1>Photo Squares</h1></div>
 <div class='search-view'>
 <input class='search-key' type="text"/>
 <ul class='employee-list'></ul>
 </div>
 
 <script src="lib/jquery-1.8.2.min.js"></script>
-<script src="js/storage/ls-store.js"></script>
+<script src="js/storage/memory-store.js"></script>
 <script src="js/main.js"></script>
+-->
 
+    <script>
+        function ReceivedImage(data) {
+            $('#Image').src = "data:image/jpeg;base64," + data;
+        }
+        
+        function ReceiveURI(uri) {
+            $('#Image').src = imageURI;
+        }
+        
+        function Error(error) {
+            alert ('Error: ' + error);
+        }
+        
+        navigator.camera.getPicture(ReceivedImage, Error, {quality:25, destinationType: Camera.DestinationType.DATA_URL});
+        navigator.camera.getPicture(ReceiveURI, Error, {quality:75, destinationType: Camera.DestinationType.FILE_URI});
+        
+        Camera.PictureSourceType = {PHOTOLIBRARY, CAMERA, SAVEDPHOTOALBUM};
+        Camera.Direction = {BACK, FRONT};
+    </script>
 </body>
 </html>
